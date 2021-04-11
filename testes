@@ -1,0 +1,105 @@
+Casos teste:
+
+
+######### 1
+
+8 9
+v i n h o t b u q
+o l d b r i a p e
+z p a s a m s o l
+n c u l m i t v h
+t e l e g r a m a
+p e a q t u n r o
+b n v e g m t a l
+a m i z a d e b o
+8
+amizade
+asa
+aula
+bastante
+sol
+telegrama
+vinho
+voz
+
+
+Resposta esperada:
+v i n h o * b * *
+o * * * * * a * *
+z * a s a * s o l
+* * u * * * t * *
+t e l e g r a m a
+* * a * * * n * *
+* * * * * * t * *
+a m i z a d e * *
+
+
+
+
+######## 2
+
+6 6
+l e i t e r
+o n t c t a
+n b e g r t
+t o p a t o
+r a t t p a 
+a i f o f o
+5
+lontra
+gato
+rato
+pato
+fofo
+
+
+Resposta esperada:
+l * * * * r
+o * * * * a
+n * * g * t
+t * p a t o
+r * * t * * 
+a * f o f o
+
+
+
+
+####### 3
+
+13 8
+a s p e r d q o
+j o i r h f e p
+o r a t c e a l
+e r l a o l i c
+d i n h e i r o
+q s g u a c u n
+b o r t a i t q
+e r t m d d a u
+p f e s t a s i
+a m d o r d a s
+d i f i c e i t
+m e r d q o v a
+n v i d a r m s
+6
+sorriso
+dinheiro
+felicidade
+conquistas
+festas
+vida
+
+
+Resposta esperada:
+* s * * * * * *
+* o * * * f * *
+* r * * * e * *
+* r * * * l * c
+d i n h e i r o
+* s * * * c * n
+* o * * * i * q
+* * * * * d * u
+* f e s t a s i
+* * * * * d * s
+* * * * * e * t
+* * * * * * * a
+* v i d a * * s
