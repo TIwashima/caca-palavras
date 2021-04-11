@@ -4,6 +4,12 @@
 
 enum direcao { BAIXO, DIREITA };
 
+int strLen(char *palavra) {
+    int i;
+    for (i=0;palavra[i] != '\0';i++);
+    return i;
+}
+
 /* Procura uma palavra na matriz em uma determinada direção
  A busca se faz letra a letra, se uma letra for encontrada,
  adicionamos suas coordenadas no vetor pos e olhamos a próxima
@@ -18,9 +24,15 @@ enum direcao { BAIXO, DIREITA };
  direcao - a direção a ser seguida
  x, y - as atuais coordenadas em que estamos buscando a letra
  pos - vetor de coordenadas das letras da palavra
+ posicao - numero equivalente ao total de letras encontradas entre todas as
+    palavras buscadas. Como salvamos todas as posicoes com letras em um vetor,
+    esse parametro serve para que encontremos em quais posicoes do vetor
+    colocar as coordenadas de cada letra.
  retorno - 0 caso a palavra seja encontrada, -1 se não for
  */
-int procurar_direcao(char *palavra, int tamanhoPalavra, int n,int linhas, int colunas, char **matriz, int direcao, int i, int j, int pos[]) {
+int procurar_direcao(char *palavra, int tamanhoPalavra, int n,int linhas, 
+    int colunas, char **matriz, int direcao, int i, int j, int pos[], 
+    int posicao) {
   int newI, newJ;
   if (direcao == BAIXO) {
     newI = i+1;
@@ -33,8 +45,8 @@ int procurar_direcao(char *palavra, int tamanhoPalavra, int n,int linhas, int co
   }
 
   if (matriz[i][j] == palavra[n]) {
-    pos[2*n] = i;
-    pos[2*n+1] = j;
+    pos[2 * (posicao + n)] = i;
+    pos[2 * (posicao + n) + 1] = j;
   } else if (newI == linhas || newJ == colunas) {
     return 0; 
   } else {
@@ -44,7 +56,8 @@ int procurar_direcao(char *palavra, int tamanhoPalavra, int n,int linhas, int co
   if (tamanhoPalavra == n+1) {
     return 1;
   } else {
-    return procurar_direcao(palavra, tamanhoPalavra, n+1, linhas, colunas, matriz, direcao, newI, newJ, pos);
+    return procurar_direcao(palavra, tamanhoPalavra, n+1, linhas, colunas, 
+        matriz, direcao, newI, newJ, pos, posicao);
   }
 }
 
@@ -56,19 +69,24 @@ int procurar_direcao(char *palavra, int tamanhoPalavra, int n,int linhas, int co
   matriz - a matriz onde buscamos a palavra
   retorno - vetor com as coordenadas das letras da palavra, formato [x0, y0, x1, y1, ...]
 */
-int procurar_palavra(char *palavra, int tamanhoPalavra, int linhas, int colunas, char **matriz,int * pos) {
+int procurar_palavra(char *palavra, int tamanhoPalavra, int linhas, int colunas,
+    char **matriz,int *pos, int posicao) {
   int i, j, acha_palavra;
   
   for (i = 0; i < linhas; i++) {
     for (j = 0; j < colunas; j++) {
       if (matriz[i][j] == palavra[0]) {
-        acha_palavra = procurar_direcao(palavra, tamanhoPalavra, 0, linhas, colunas, matriz, DIREITA, i, j, pos);
+        acha_palavra = procurar_direcao(palavra, tamanhoPalavra, 0, linhas, 
+            colunas, matriz, DIREITA, i, j, pos, posicao);
         if (acha_palavra) {
-          return 1;
+          posicao = posicao + strLen(palavra);
+          return posicao;
         }
-        acha_palavra = procurar_direcao(palavra, tamanhoPalavra, 0, linhas, colunas, matriz, BAIXO, i, j, pos);
+        acha_palavra = procurar_direcao(palavra, tamanhoPalavra, 0, linhas, 
+            colunas, matriz, BAIXO, i, j, pos, posicao);
         if (acha_palavra) {
-          return 1;
+          posicao = posicao + strLen(palavra);
+          return posicao;
         }
       }
     }
@@ -85,11 +103,13 @@ void le_matriz(char **matriz, int linhas, int colunas) {
   }
 }
 
-void le_palavras(char **palavras, int qtd_palavras) {
-  int i;
+int le_palavras(char **palavras, int qtd_palavras) {
+  int i, tamanhoPos = 0;
   for (i = 0; i < qtd_palavras; i++) {
     scanf("%s", palavras[i]);
+    tamanhoPos = tamanhoPos + strLen(palavras[i]);
   }
+  return tamanhoPos;
 }
 
 /* função printaMartiz: imprime o caça palavras apenas com as palavras encotradas
@@ -134,10 +154,9 @@ void printaMatriz(int pos[], int tamanho, char **matriz, int linhas, int colunas
 int main() {
 
   // Recebe o caça-palavras, que é armazenado em uma matriz de char
-  int linhas, colunas, tamanhoPalavra, acha_palavra,;
+  int linhas, colunas, tamanhoPalavra, acha_palavra, tamanhoPos, posicao = 0;
   scanf("%d", &linhas);
   scanf("%d", &colunas);
-  int pos[MAX(linhas,colunas) * 2];
 
   char **matriz;
   int i, j;
@@ -156,25 +175,18 @@ int main() {
   for (i = 0; i < qtd_palavras; i++) {
     palavras[i] = calloc(MAX(linhas, colunas), sizeof(char));
   }
-  le_palavras(palavras, qtd_palavras);
+  tamanhoPos = le_palavras(palavras, qtd_palavras);
+  int pos[tamanhoPos * 2];
   
   // A partir daqui é testando a busca
   for (i = 0; i < qtd_palavras; i++) {
     // Isso aqui conta o tamanho da palavra
-    for (j = 0; palavras[i][j] != '\0'; j++);
-    tamanhoPalavra = j;
-    // Realmente fazendo a busca
-    acha_palavra = procurar_palavra(palavras[i], tamanhoPalavra, linhas, colunas, matriz, pos);
-    if (acha_palavra) {
-        // Por enquanto só printa o vetor de posições, de cada palavra, é preciso integrar melhor
-        // com o print. Talvez fazendo um vetor de vetores de posição?
-        for (j = 0; j < tamanhoPalavra * 2; j++) {
-            printf("%d ", pos[j]);
-        }
-    } else {
-        printf("Palavra nao encontrada");
-    }
+    tamanhoPalavra = strLen(palavras[i]);
+    posicao = procurar_palavra(palavras[i], tamanhoPalavra, linhas, colunas,
+        matriz, pos, posicao);
   }
+  
+  printaMatriz(pos, tamanhoPos * 2, matriz, linhas, colunas);
     
   for (i = 0; i < 3; i++)
       free(matriz[i]);
