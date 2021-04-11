@@ -92,6 +92,45 @@ void le_palavras(char **palavras, int qtd_palavras) {
   }
 }
 
+/* função printaMartiz: imprime o caça palavras apenas com as palavras encotradas
+
+  Parametros:
+
+  pos[] - vetor com as coordenadas das letras da palavra, formato [x0, y0, x1, y1, ...]
+  tamanho - tamanho do vetor pos[]
+  matriz - a matriz que contém o caça palavras
+  linhas - número de linhas da matriz
+  colunas - número de colunas da matriz
+*/
+
+void printaMatriz(int pos[], int tamanho, char **matriz, int linhas, int colunas){
+    char **aux;
+
+    aux = malloc(linhas*sizeof (char*));
+    for (int i=0; i < linhas; i++)
+        aux[i] = malloc (colunas * sizeof (char)) ;
+    for (int i = 0; i < linhas; ++i) {
+        for (int j = 0; j < colunas; ++j) {
+            aux[i][j]='*';
+        }
+    }
+    for (int i = 0; i < tamanho; i=i+2) {
+        int a = pos[i];
+        int b = pos[i+1];
+        aux[a][b]=matriz[a][b];
+    }
+    for (int i = 0; i < linhas; ++i) {
+        for (int j = 0; j < colunas; ++j) {
+            printf("%c ", aux[i][j]);
+        }
+        printf("\n");
+    }
+
+    for (int i=0; i < linhas; i++)
+        free(aux[i]);
+    free(aux) ;
+}
+
 int main() {
 
   // Recebe o caça-palavras, que é armazenado em uma matriz de char
