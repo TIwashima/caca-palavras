@@ -179,29 +179,26 @@ int main() {
   for (i = 0; i < linhas; i++) {
     matriz[i] = malloc(colunas * sizeof(char));
   }
+
   le_matriz(matriz, linhas, colunas);
+
   // Recebe as palavras que serão encontradas e armazena em um vetor
   int qtd_palavras;
   scanf("%d", &qtd_palavras);
   char **palavras;
+
   palavras = malloc(qtd_palavras * sizeof(char *));
   for (i = 0; i < qtd_palavras; i++) {
     palavras[i] = calloc(MAX(linhas, colunas), sizeof(char));
   }
+
   tamanhoPos = le_palavras(palavras, qtd_palavras);
   int pos[tamanhoPos * 2];
-  
-  /* // A partir daqui é testando a busca
-  for (i = 0; i < qtd_palavras; i++) {
-    // Isso aqui conta o tamanho da palavra
-    tamanhoPalavra = strLen(palavras[i]);
-    posicao = procurar_palavra(palavras[i], tamanhoPalavra, linhas, colunas,
-        matriz, pos, posicao);
-  } */
+
+  // Criação das threads. Cada thread irá procurar uma palvra.
   pthread_t thr[qtd_palavras];
   struct args structPalavras[qtd_palavras];
-  
-  //structPalavras = (struct args *)malloc(qtd_palavras * sizeof(struct args));
+
   for(i = 0; i < qtd_palavras; i++){
     tamanhoPalavra = strLen(palavras[i]);
     structPalavras[i].palavra = palavras[i];
@@ -223,8 +220,6 @@ int main() {
   for (i = 0; i < 3; i++)
       free(matriz[i]);
   free(matriz);
-
-  //free(structPalavras);
 
   return 0;
 }
