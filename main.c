@@ -220,6 +220,8 @@ int main() {
   for (i = 0; i < 3; i++)
       free(matriz[i]);
   free(matriz);
+  free(palavras);
+    
 
   return 0;
 }
