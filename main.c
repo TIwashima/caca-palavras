@@ -1,8 +1,20 @@
+#include <pthread.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <unistd.h>
 #define MAX(x, y) (((x) > (y)) ? (x) : (y))
 
 enum direcao { BAIXO, DIREITA };
+
+struct args {
+  char *palavra;
+  int tamanhoPalavra;
+  int linhas;
+  int colunas;
+  char **matriz;
+  int *pos; 
+  int posicao;
+};
 
 int strLen(char *palavra) {
     int i;
@@ -69,29 +81,31 @@ int procurar_direcao(char *palavra, int tamanhoPalavra, int n,int linhas,
   matriz - a matriz onde buscamos a palavra
   retorno - vetor com as coordenadas das letras da palavra, formato [x0, y0, x1, y1, ...]
 */
-int procurar_palavra(char *palavra, int tamanhoPalavra, int linhas, int colunas,
-    char **matriz,int *pos, int posicao) {
+void* procurar_palavra(void *structPalavra) {
   int i, j, acha_palavra;
-  
+  char *palavra = ((struct args*)structPalavra)->palavra;
+  int tamanhoPalavra = ((struct args*)structPalavra)->tamanhoPalavra;
+  int linhas = ((struct args*)structPalavra)->linhas ;
+  int colunas = ((struct args*)structPalavra)->colunas;
+  char **matriz = ((struct args*)structPalavra)->matriz;
+  int *pos = ((struct args*)structPalavra)->pos; 
+  int posicao = ((struct args*)structPalavra)->posicao;
   for (i = 0; i < linhas; i++) {
     for (j = 0; j < colunas; j++) {
       if (matriz[i][j] == palavra[0]) {
         acha_palavra = procurar_direcao(palavra, tamanhoPalavra, 0, linhas, 
             colunas, matriz, DIREITA, i, j, pos, posicao);
         if (acha_palavra) {
-          posicao = posicao + strLen(palavra);
-          return posicao;
+          return NULL;
         }
         acha_palavra = procurar_direcao(palavra, tamanhoPalavra, 0, linhas, 
             colunas, matriz, BAIXO, i, j, pos, posicao);
         if (acha_palavra) {
-          posicao = posicao + strLen(palavra);
-          return posicao;
+          return NULL;
         }
       }
     }
   }
-  return 0;
 }
 
 void le_matriz(char **matriz, int linhas, int colunas) {
@@ -109,6 +123,7 @@ int le_palavras(char **palavras, int qtd_palavras) {
     scanf("%s", palavras[i]);
     tamanhoPos = tamanhoPos + strLen(palavras[i]);
   }
+  
   return tamanhoPos;
 }
 
@@ -165,11 +180,9 @@ int main() {
     matriz[i] = malloc(colunas * sizeof(char));
   }
   le_matriz(matriz, linhas, colunas);
-
   // Recebe as palavras que serão encontradas e armazena em um vetor
   int qtd_palavras;
   scanf("%d", &qtd_palavras);
-
   char **palavras;
   palavras = malloc(qtd_palavras * sizeof(char *));
   for (i = 0; i < qtd_palavras; i++) {
@@ -178,19 +191,40 @@ int main() {
   tamanhoPos = le_palavras(palavras, qtd_palavras);
   int pos[tamanhoPos * 2];
   
-  // A partir daqui é testando a busca
+  /* // A partir daqui é testando a busca
   for (i = 0; i < qtd_palavras; i++) {
     // Isso aqui conta o tamanho da palavra
     tamanhoPalavra = strLen(palavras[i]);
     posicao = procurar_palavra(palavras[i], tamanhoPalavra, linhas, colunas,
         matriz, pos, posicao);
-  }
+  } */
+  pthread_t thr[qtd_palavras];
+  struct args structPalavras[qtd_palavras];
   
+  //structPalavras = (struct args *)malloc(qtd_palavras * sizeof(struct args));
+  for(i = 0; i < qtd_palavras; i++){
+    tamanhoPalavra = strLen(palavras[i]);
+    structPalavras[i].palavra = palavras[i];
+    structPalavras[i].tamanhoPalavra = tamanhoPalavra;
+    structPalavras[i].linhas = linhas;
+    structPalavras[i].colunas = colunas;
+    structPalavras[i].matriz = matriz;
+    structPalavras[i].pos = pos;
+    structPalavras[i].posicao = posicao;
+    pthread_create(&thr[i], NULL, procurar_palavra, (void *)(&(structPalavras[i])));
+    posicao = posicao + tamanhoPalavra;
+  }
+
+  for (i = 0; i < qtd_palavras; i++) 
+    pthread_join(thr[i], NULL); 
+
   printaMatriz(pos, tamanhoPos * 2, matriz, linhas, colunas);
-    
+  
   for (i = 0; i < 3; i++)
       free(matriz[i]);
   free(matriz);
+
+  //free(structPalavras);
 
   return 0;
 }
